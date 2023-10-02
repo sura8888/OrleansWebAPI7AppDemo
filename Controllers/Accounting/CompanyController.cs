@@ -26,6 +26,9 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             company.代表者名 = "太郎";
             company.代表者フリガナ姓 = "エンボ";
             company.代表者フリガナ名 = "タロウ";
+            company.住所郵便番号 = "1120012";
+            company.住所都道府県 = "東京都";
+            company.住所1 = "文京区大塚1-5-18";
             return company;
         }
 
