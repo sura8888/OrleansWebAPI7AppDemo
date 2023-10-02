@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Orleans.Runtime;
 using OrleansWebAPI7AppDemo.Orleans.Abstractions;
 
-namespace OrleansWebAPI7AppDemo.Controllers
+namespace OrleansWebAPI7AppDemo.Controllers.Demo
 {
     // https://learn.microsoft.com/ja-jp/dotnet/orleans/quickstarts/build-your-first-orleans-app?tabs=visual-studio
     [ApiController]
@@ -13,13 +13,13 @@ namespace OrleansWebAPI7AppDemo.Controllers
         private readonly ILogger<OrleansStringCacheController> _logger;
         private readonly IGrainFactory _grains;
 
-        public OrleansStringCacheController(ILogger<OrleansStringCacheController> logger , IGrainFactory grains)
+        public OrleansStringCacheController(ILogger<OrleansStringCacheController> logger, IGrainFactory grains)
         {
             _logger = logger;
             _grains = grains;
         }
-        
-        [HttpGet("set/{value}",  Name = "Set")]
+
+        [HttpGet("set/{value}", Name = "Set")]
         public async Task<Uri> Set(string value)
         {
             // Create a unique, short ID
@@ -29,7 +29,7 @@ namespace OrleansWebAPI7AppDemo.Controllers
             var stringCacheGrain = _grains.GetGrain<IStringCacheGrain>(key);
             await stringCacheGrain.SetValue(value);
 
-                        // Return the shortened URL for later use
+            // Return the shortened URL for later use
             var resultBuilder = new UriBuilder($"{Request.Scheme}://{Request.Host.Value}")
             {
                 Path = $"/stringcache/get/{key}"

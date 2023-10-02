@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using OrleansWebAPI7AppDemo.Models;
+using OrleansWebAPI7AppDemo.Models.Demo;
 
-namespace OrleansWebAPI7AppDemo.Controllers
+namespace OrleansWebAPI7AppDemo.Controllers.Demo
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using OrleansWebAPI7AppDemo.Models;
+using OrleansWebAPI7AppDemo.Models.Demo;
 
-namespace OrleansWebAPI7AppDemo.Controllers
+namespace OrleansWebAPI7AppDemo.Controllers.Demo
 {
     [ApiController]
     [Route("[controller]/[action]")]
@@ -14,7 +14,7 @@ namespace OrleansWebAPI7AppDemo.Controllers
         }
 
         [HttpGet()]
-        public String TestValue()
+        public string TestValue()
         {
             return "あいうえお";
         }

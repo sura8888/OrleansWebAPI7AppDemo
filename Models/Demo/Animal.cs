@@ -1,6 +1,6 @@
 ﻿using OrleansCodeGen.Orleans.Serialization.Codecs;
 
-namespace OrleansWebAPI7AppDemo.Models
+namespace OrleansWebAPI7AppDemo.Models.Demo
 {
     /// <summary>
     /// 
@@ -8,23 +8,23 @@ namespace OrleansWebAPI7AppDemo.Models
     public class Animal
     {
         // 名前
-        private String _name = String.Empty;
-        public string Name 
-        { 
+        private string _name = string.Empty;
+        public string Name
+        {
             get
             {
                 return _name;
-            } 
-            set 
-            { 
+            }
+            set
+            {
                 _name = value;
-            } 
+            }
         }
 
 
         // 年齢
-        private Int32 _age = 0;
-        public Int32 Age
+        private int _age = 0;
+        public int Age
         {
             get
             {
