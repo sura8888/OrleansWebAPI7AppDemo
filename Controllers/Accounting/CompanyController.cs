@@ -6,31 +6,76 @@ using OrleansWebAPI7AppDemo.Models.Demo;
 namespace OrleansWebAPI7AppDemo.Controllers.Accounting
 {
     [ApiController]
-    [Route("Accounting/[controller]/[action]")]
+    [Route("Accounting/[controller]")]
     public class CompanyController : ControllerBase
     {
 
         public CompanyController()
         {
         }
-
+        /// <summary>
+        /// 会社情報のコード一覧を取得します
+        /// </summary>
+        /// <returns></returns>
         [HttpGet()]
-        [Route("/Accounting/Company")]
-        public Company Index()
+        [Route("")]
+        public IList<string> Index()
+        {
+            var companies = new List<string>();
+            // ↓↓　一般的にはデータベースから取得する
+            // SELECT * FROM Company;
+            companies.Add("t283162780");
+            // ↑↑
+            return companies;
+        }
+        /// <summary>
+        /// 会社情報をコードを指定して取得します
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet()]
+        [Route("{id}")]
+        public Company Get(string id)
         {
             var company = new Company();
-            company.Code = "t283162780";
-            company.Name = "デモ株式会社";
-            company.NameKana = "デモカブシキガイシャ";
-            company.代表者姓 = "円簿";
-            company.代表者名 = "太郎";
-            company.代表者フリガナ姓 = "エンボ";
-            company.代表者フリガナ名 = "タロウ";
-            company.住所郵便番号 = "1120012";
-            company.住所都道府県 = "東京都";
-            company.住所1 = "文京区大塚1-5-18";
+            // ↓↓　一般的にはデータベースから取得する
+            // SELECT * FROM Company WHERE Code = {id};
+            switch (id)
+            {
+                case "t283162780":
+                    {
+                        company.Code = "t283162780";
+                        company.Name = "デモ株式会社";
+                        company.NameKana = "デモカブシキガイシャ";
+                        company.代表者姓 = "円簿";
+                        company.代表者名 = "太郎";
+                        company.代表者フリガナ姓 = "エンボ";
+                        company.代表者フリガナ名 = "タロウ";
+                        company.住所郵便番号 = "1120012";
+                        company.住所都道府県 = "東京都";
+                        company.住所1 = "文京区大塚1-5-18";
+                    }
+                    break;
+            }
+            // ↑↑
             return company;
         }
+        /// <summary>
+        /// 会社情報を修正します。
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="company"></param>
+        /// <returns></returns>
+        [HttpPost()]
+        [Route("{id}")]
 
+        public Company Set(string id , [FromBody] Company company)
+        {
+            // ↓↓　テストでデータの一部分を更新
+            // UPDATE company SET 住所1 = '**** ;
+            company.住所1 = "テストで上書きされたデータ";
+            // ↑↑
+            return company;
+        }
     }
 }

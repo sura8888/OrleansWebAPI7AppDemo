@@ -2,8 +2,8 @@
 
 namespace OrleansWebAPI7AppDemo.Models.Accounting
 {
-    ///Accounting
-    /// 
+    /// <summary>
+    /// 会社情報
     /// </summary>
     public class Company
     {

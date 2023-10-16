@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Orleans.Runtime;
+using System.Reflection;
 
 // https://learn.microsoft.com/ja-jp/dotnet/orleans/quickstarts/build-your-first-orleans-app?tabs=visual-studio
 
@@ -18,7 +19,12 @@ builder.Host.UseOrleans(siloBuilder =>
     siloBuilder.UseInMemoryReminderService();
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen( options =>
+{
+    // using System.Reflection;
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
