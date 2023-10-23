@@ -41,31 +41,51 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         /// <returns></returns>
         [HttpGet()]
         [Route("{id}")]
-        public async Task<Company> Get(string id)
+        public async Task<IActionResult> Get(string id)
         {
-            // var company = new Company();
-            // ↓↓　一般的にはデータベースから取得する
+            // グレインの呼び出し
             var campanyGrain = _grains.GetGrain<ICompanyGrain>(id);
+            // 指定グレインのGETメソッドを実行して結果を取得する
             var company = await campanyGrain.Get();
-            // ↑↑
-            return company;
+            if (company == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(company);
+            }
         }
         /// <summary>
-        /// 会社情報を修正します。
+        /// 会社情報を追加・修正します。
         /// </summary>
         /// <param name="id"></param>
         /// <param name="company"></param>
         /// <returns></returns>
-        [HttpPost()]
+        [HttpPut()]
         [Route("{id}")]
         public async Task<Company> Set(string id , [FromBody] Company company)
         {
-            // ↓↓　テストでデータの一部分を更新
-            // UPDATE company SET 住所1 = '**** ;
+       
             var campanyGrain = _grains.GetGrain<ICompanyGrain>(id);
             await campanyGrain.Set(company);
-            // ↑↑
+
             return company;
+        }
+        /// <summary>
+        /// 会社情報を削除します
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete()]
+        [Route("{id}")]
+        public async Task<IActionResult> Remove(string id)
+        {
+            // ↓↓　テストでデータの一部分を更新
+            var campanyGrain = _grains.GetGrain<ICompanyGrain>(id);
+            await campanyGrain.Remove();
+            // ↑↑
+            return Ok();
         }
     }
 }

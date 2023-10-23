@@ -2,11 +2,11 @@
 
 namespace OrleansWebAPI7AppDemo.Orleans.Abstractions
 {
-    public interface ICompanyGrain : IGrainWithStringKey
+    public interface IAccountItemGrain : IGrainWithStringKey
     {
-        Task<Company?> Get();
+        Task<AccountItem?> Get();
 
-        Task Set(Company value);
+        Task Set(AccountItem value);
 
         Task Remove();
     }

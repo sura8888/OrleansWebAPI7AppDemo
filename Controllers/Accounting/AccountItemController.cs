@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using OrleansWebAPI7AppDemo.Models.Accounting;
 using OrleansWebAPI7AppDemo.Models.Demo;
+using OrleansWebAPI7AppDemo.Orleans.Abstractions;
 
 namespace OrleansWebAPI7AppDemo.Controllers.Accounting
 {
@@ -10,8 +11,11 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
     public class AccountItemController : ControllerBase
     {
 
-        public AccountItemController()
+        private readonly IGrainFactory _grains;
+
+        public AccountItemController(IGrainFactory grains)
         {
+            _grains = grains;
         }
         /// <summary>
         /// 勘定科目を取得します
@@ -37,61 +41,51 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         [HttpGet()]
         [Route("{id}")]
 
-        public AccountItem Get(String id)
+        public async Task<IActionResult> Get(String id)
         {
-            var item = new AccountItem();
-            // ↓↓　一般的にはデータベースから取得する
-            // SELECT * FROM AccountItem WHERE Code = {id};
-            switch (id)
+            // グレインの呼び出し
+            var campanyGrain = _grains.GetGrain<IAccountItemGrain>(id);
+            // 指定グレインのGETメソッドを実行して結果を取得する
+            var accountItem = await campanyGrain.Get();
+            if (accountItem == null)
             {
-                case "100":
-                    {
-                        item.Code = "100";
-                        item.Name = "現金";
-                        item.略称 = "現金";
-                        item.カナ = "ゲンキン";
-                        item.ローマ字 = "genkin";
-                        item.貸借 = 貸借区分.借方科目;
-                        item.消費税 = 消費税区分.対象外;
-                        item.帳表種類 = 帳表種類区分.貸借対照表;
-                        item.集計先科目 = "1399";
-                        item.帳簿区分 = 帳簿区分.現金;
-                    }
-                    break;
-                case "700":
-                    {
-                        item.Code = "700";
-                        item.Name = "売上高";
-                        item.略称 = "売上高";
-                        item.カナ = "ウリアゲダカ";
-                        item.ローマ字 = "uriagedaka";
-                        item.貸借 = 貸借区分.借方科目;
-                        item.消費税 = 消費税区分.売上;
-                        item.帳表種類 = 帳表種類区分.損益計算書;
-                        item.集計先科目 = "7199";
-                        item.帳簿区分 = 帳簿区分.設定なし;
-                    }
-                    break;
+                return NotFound();
             }
-
-            // ↑↑　
-            return item;
+            else
+            {
+                return Ok(accountItem);
+            }
         }
         /// <summary>
-        /// 指定したIDの勘定科目を修正します
+        /// 会社情報を追加・修正します。
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="item"></param>
+        /// <param name="accountItem"></param>
         /// <returns></returns>
-        [HttpPost()]
+        [HttpPut()]
         [Route("{id}")]
-        public AccountItem Set(String id , [FromBody] AccountItem item)
+        public async Task<AccountItem> Set(string id, [FromBody] AccountItem accountItem)
+        {
+
+            var campanyGrain = _grains.GetGrain<IAccountItemGrain>(id);
+            await campanyGrain.Set(accountItem);
+
+            return accountItem;
+        }
+        /// <summary>
+        /// 会社情報を削除します
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete()]
+        [Route("{id}")]
+        public async Task<IActionResult> Remove(string id)
         {
             // ↓↓　テストでデータの一部分を更新
-            // UPDATE AccountItem SET 略称 = '**** ;
-            item.略称 = "システムで上書きした値が表示されています";
-            // ↑↑　
-            return item;
+            var campanyGrain = _grains.GetGrain<IAccountItemGrain>(id);
+            await campanyGrain.Remove();
+            // ↑↑
+            return Ok();
         }
 
     }
