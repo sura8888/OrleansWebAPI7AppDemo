@@ -69,6 +69,15 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
 
             return authentication;
         }
+        [HttpPut()]
+        [Route("gethash")]
+        public async Task<String> GetHash([FromBody] Authentication authentication)
+        {
+
+            var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
+            var hash = await authenticationGrain.GetPasswordHash(authentication);
+            return hash;
+        }
         /// <summary>
         /// 会社情報を削除します
         /// </summary>

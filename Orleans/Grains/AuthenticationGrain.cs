@@ -1,10 +1,12 @@
-﻿using Orleans.Runtime;
+﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Orleans.Runtime;
 using OrleansWebAPI7AppDemo.Models.Accounting;
 using OrleansWebAPI7AppDemo.Orleans.Abstractions;
+using System.Text;
 
 namespace OrleansWebAPI7AppDemo.Orleans.Grains
 {
-    public class AuthenticationGrain : Grain , IAuthenticationGrain
+    public class AuthenticationGrain : Grain, IAuthenticationGrain
     {
         private Authentication? _model { get; set; }
 
@@ -18,7 +20,7 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             string primaryKey = this.GetPrimaryKeyString(); //Grain IDを取得
 
             // ↓　本来はデータベースから取得する
-            switch(primaryKey)
+            switch (primaryKey)
             {
                 case "test@test.com":
                     {
@@ -43,10 +45,10 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             return Task.FromResult(_model);
         }
 
-        public Task Set(Authentication company)
+        public Task Set(Authentication model)
         {
             // UPDATE company SET 住所1 = '**** ;
-            _model = company;
+            _model = model;
             return Task.CompletedTask;
         }
 
@@ -55,6 +57,17 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             // DELETE FROM company where ID = '****' ;
             _model = null;
             return Task.CompletedTask;
+        }
+
+        public Task<string> GetPasswordHash(Authentication model)
+        {
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: model.Password!,
+                salt: Encoding.Unicode.GetBytes(model.Code),
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8));
+            return Task.FromResult(hashed);
         }
 
     }

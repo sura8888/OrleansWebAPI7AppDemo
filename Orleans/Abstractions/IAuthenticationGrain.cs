@@ -10,6 +10,6 @@ namespace OrleansWebAPI7AppDemo.Orleans.Abstractions
 
         Task Remove();
 
-
+        Task<string> GetPasswordHash(Authentication model);
     }
 }
