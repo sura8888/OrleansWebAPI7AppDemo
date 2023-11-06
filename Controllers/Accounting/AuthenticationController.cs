@@ -16,24 +16,10 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         {
             _grains = grains;
         }
-        /// <summary>
-        /// 勘定科目を取得します
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet()]
-        [Route("")]
-        public IList<string> Index()
-        {
-            var items = new List<string>();
-            // ↓↓　一般的にはデータベースから取得する
-            // SELECT * FROM Authentication;
-            items.Add("test@test.com");
-            // ↑↑　
-            return items;
-        }
+
 
         ///// <summary>
-        ///// 指定したコードの勘定科目を取得します
+        ///// 認証データを取得します
         ///// </summary>
         ///// <returns></returns>
         [HttpGet()]
@@ -55,32 +41,22 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             }
         }
         /// <summary>
-        /// 会社情報を追加・修正します。
+        /// ハッシュコードを取得します
         /// </summary>
-        /// <param name="id"></param>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        //[HttpPut()]
-        //[Route("{id}")]
-        //public async Task<Authentication> Set(string id, [FromBody] Authentication authentication)
-        //{
-
-        //    var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(id);
-        //    await authenticationGrain.Set(authentication);
-
-        //    return authentication;
-        //}
         [HttpPut()]
         [Route("gethash")]
         public async Task<String> GetHash([FromBody] Authentication authentication)
         {
-
+            // ユーザーIDでグレインの呼び出し
             var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
+            // パスワードハッシュの作成
             var hash = await authenticationGrain.GetPasswordHash(authentication);
             return hash;
         }
         /// <summary>
-        /// 会社情報を削除します
+        /// ユーザーデータを削除します
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -88,36 +64,48 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         [Route("{id}")]
         public async Task<IActionResult> Remove(string id)
         {
-            // ↓↓　テストでデータの一部分を更新
+            // ユーザーIDでグレインの呼び出し
             var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(id);
+            // ユーザーデータの削除
             await authenticationGrain.Remove();
             // ↑↑
             return Ok();
         }
 
-
+        /// <summary>
+        /// ユーザーIDとパスワードから認証処理を行い
+        /// 認証できた場合にはセッションIDを返す
+        /// </summary>
+        /// <param name="authentication"></param>
+        /// <returns></returns>
         [HttpPost()]
         [Route("auth")]
         public async Task<Guid?> Authentication([FromBody] Authentication authentication)
         {
-            //
+            // ユーザーIDでグレインの呼び出し
             var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
+            // 認証処理を実行
             var result = await authenticationGrain.Authenticate(authentication);
             //
-            if (result)
+            if (result) // 認証OK時の処理
             {
+                // 新規セッションIDの作成
                 var guid = Guid.NewGuid();
+                // セッションIDからセッショングレインの呼び出し
                 var sessionGrain = _grains.GetGrain<ISessionGrain>(guid);
+                // セッションデータの作成
                 var session = new Session
                 {
                     Enabled = true,
                     Expired = DateTime.UtcNow.AddHours(12),
                     UserId = authentication.Code
                 };
+                // グレインにセッションデータを保存
                 await sessionGrain.Set(session);
+                // セッションIDを返す
                 return guid;
             }
-            return null;
+            return null; //認証NG時はNULLを返す
         }
 
     }
