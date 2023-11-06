@@ -95,16 +95,16 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         }
 
 
-        [HttpPost()]
-        [Route("{id}")]
-        public async Task<Authentication> Authentication([FromBody] Authentication authentication)
-        {
+        //[HttpPost()]
+        //[Route("{id}")]
+        //public async Task<Authentication> Authentication([FromBody] Authentication authentication)
+        //{
 
-            var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
-            var current =  await authenticationGrain.Get();
+        //    var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
+        //    var current =  await authenticationGrain.Get();
 
-            return authentication;
-        }
+        //    return authentication;
+        //}
 
     }
 }

@@ -59,16 +59,16 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             return Task.CompletedTask;
         }
 
-        public Task<string> GetPasswordHash(Authentication model)
-        {
-            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: model.Password!,
-                salt: Encoding.Unicode.GetBytes(model.Code),
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 100000,
-                numBytesRequested: 256 / 8));
-            return Task.FromResult(hashed);
-        }
+        //public Task<string> GetPasswordHash(Authentication model)
+        //{
+        //    string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+        //        password: model.Password!,
+        //        salt: Encoding.Unicode.GetBytes(model.Code),
+        //        prf: KeyDerivationPrf.HMACSHA256,
+        //        iterationCount: 100000,
+        //        numBytesRequested: 256 / 8));
+        //    return Task.FromResult(hashed);
+        //}
 
     }
 
