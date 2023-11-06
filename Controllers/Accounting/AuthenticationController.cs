@@ -98,12 +98,26 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
 
         [HttpPost()]
         [Route("auth")]
-        public async Task<bool> Authentication([FromBody] Authentication authentication)
+        public async Task<Guid?> Authentication([FromBody] Authentication authentication)
         {
-
+            //
             var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
             var result = await authenticationGrain.Authenticate(authentication);
-            return result;
+            //
+            if (result)
+            {
+                var guid = Guid.NewGuid();
+                var sessionGrain = _grains.GetGrain<ISessionGrain>(guid);
+                var session = new Session
+                {
+                    Enabled = true,
+                    Expired = DateTime.UtcNow.AddHours(12),
+                    UserId = authentication.Code
+                };
+                await sessionGrain.Set(session);
+                return guid;
+            }
+            return null;
         }
 
     }

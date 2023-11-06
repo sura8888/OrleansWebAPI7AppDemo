@@ -41,16 +41,16 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         public async Task<IActionResult> Get(string id)
         {
             // グレインの呼び出し
-            var campanyGrain = _grains.GetGrain<ICompanyGrain>(id);
+            var sessionGrain = _grains.GetGrain<ICompanyGrain>(id);
             // 指定グレインのGETメソッドを実行して結果を取得する
-            var company = await campanyGrain.Get();
-            if (company == null)
+            var session = await sessionGrain.Get();
+            if (session == null)
             {
                 return NotFound();
             }
             else
             {
-                return Ok(company);
+                return Ok(session);
             }
         }
         /// <summary>
