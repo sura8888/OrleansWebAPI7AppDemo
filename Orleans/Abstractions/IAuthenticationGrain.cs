@@ -4,12 +4,14 @@ namespace OrleansWebAPI7AppDemo.Orleans.Abstractions
 {
     public interface IAuthenticationGrain : IGrainWithStringKey
     {
-        Task<Authentication?> Get();
+        Task<AuthenticationState?> Get();
 
-        Task Set(Authentication value);
+        Task Set(AuthenticationState value);
 
         Task Remove();
 
         Task<string> GetPasswordHash(Authentication model);
+
+        Task<bool> Authenticate(Authentication model);
     }
 }

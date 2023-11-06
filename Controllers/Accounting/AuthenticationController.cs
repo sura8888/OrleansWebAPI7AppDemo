@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrleansWebAPI7AppDemo.Models.Accounting;
 using OrleansWebAPI7AppDemo.Orleans.Abstractions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace OrleansWebAPI7AppDemo.Controllers.Accounting
 {
@@ -35,40 +36,40 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         ///// 指定したコードの勘定科目を取得します
         ///// </summary>
         ///// <returns></returns>
-        //[HttpGet()]
-        //[Route("{id}")]
+        [HttpGet()]
+        [Route("{id}")]
 
-        //public async Task<IActionResult> Get(String id)
-        //{
-        //    // グレインの呼び出し
-        //    var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(id);
-        //    // 指定グレインのGETメソッドを実行して結果を取得する
-        //    var authentication = await authenticationGrain.Get();
-        //    if (authentication == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    else
-        //    {
-        //        return Ok(authentication);
-        //    }
-        //}
+        public async Task<IActionResult> Get(String id)
+        {
+            // グレインの呼び出し
+            var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(id);
+            // 指定グレインのGETメソッドを実行して結果を取得する
+            var authentication = await authenticationGrain.Get();
+            if (authentication == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(authentication);
+            }
+        }
         /// <summary>
         /// 会社情報を追加・修正します。
         /// </summary>
         /// <param name="id"></param>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        [HttpPut()]
-        [Route("{id}")]
-        public async Task<Authentication> Set(string id, [FromBody] Authentication authentication)
-        {
+        //[HttpPut()]
+        //[Route("{id}")]
+        //public async Task<Authentication> Set(string id, [FromBody] Authentication authentication)
+        //{
 
-            var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(id);
-            await authenticationGrain.Set(authentication);
+        //    var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(id);
+        //    await authenticationGrain.Set(authentication);
 
-            return authentication;
-        }
+        //    return authentication;
+        //}
         [HttpPut()]
         [Route("gethash")]
         public async Task<String> GetHash([FromBody] Authentication authentication)
@@ -95,16 +96,15 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         }
 
 
-        //[HttpPost()]
-        //[Route("{id}")]
-        //public async Task<Authentication> Authentication([FromBody] Authentication authentication)
-        //{
+        [HttpPost()]
+        [Route("auth")]
+        public async Task<bool> Authentication([FromBody] Authentication authentication)
+        {
 
-        //    var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
-        //    var current =  await authenticationGrain.Get();
-
-        //    return authentication;
-        //}
+            var authenticationGrain = _grains.GetGrain<IAuthenticationGrain>(authentication.Code);
+            var result = await authenticationGrain.Authenticate(authentication);
+            return result;
+        }
 
     }
 }

@@ -8,7 +8,7 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
 {
     public class AuthenticationGrain : Grain, IAuthenticationGrain
     {
-        private Authentication? _model { get; set; }
+        private AuthenticationState? _model { get; set; }
 
         public AuthenticationGrain()
         {
@@ -24,10 +24,10 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             {
                 case "test@test.com":
                     {
-                        _model = new Authentication
+                        _model = new AuthenticationState
                         {
                             Code = "test@test.com",
-                            Password = "testtesttest"
+                            PasswordHash = "Mm7UM0Cj8t0oaKIMSDZdT4n+SpJeTpefGvw9+YFM2Fg="
                         };
                     }
                     break;
@@ -40,12 +40,12 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             return base.OnActivateAsync(cancellationToken);
         }
 
-        public Task<Authentication?> Get()
+        public Task<AuthenticationState?> Get()
         {
             return Task.FromResult(_model);
         }
 
-        public Task Set(Authentication model)
+        public Task Set(AuthenticationState model)
         {
             // UPDATE company SET 住所1 = '**** ;
             _model = model;
@@ -59,16 +59,22 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             return Task.CompletedTask;
         }
 
-        //public Task<string> GetPasswordHash(Authentication model)
-        //{
-        //    string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-        //        password: model.Password!,
-        //        salt: Encoding.Unicode.GetBytes(model.Code),
-        //        prf: KeyDerivationPrf.HMACSHA256,
-        //        iterationCount: 100000,
-        //        numBytesRequested: 256 / 8));
-        //    return Task.FromResult(hashed);
-        //}
+        public async Task<bool> Authenticate(Authentication model)
+        {
+            var hash = await GetPasswordHash(model);
+            return _model?.PasswordHash == hash;
+        }
+
+        public Task<string> GetPasswordHash(Authentication model)
+        {
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: model.Password!,
+                salt: Encoding.Unicode.GetBytes(model.Code),
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8));
+            return Task.FromResult(hashed);
+        }
 
     }
 
