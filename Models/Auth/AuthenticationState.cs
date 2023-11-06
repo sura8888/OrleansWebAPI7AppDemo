@@ -3,7 +3,7 @@
 namespace OrleansWebAPI7AppDemo.Models.Accounting
 {
     /// <summary>
-    /// 認証モデル
+    /// 認証モデル （パスワードはハッシュ済　保管用）
     /// </summary>
     [GenerateSerializer]
     public class AuthenticationState
@@ -12,7 +12,7 @@ namespace OrleansWebAPI7AppDemo.Models.Accounting
         // ユーザーID （メールアドレス）
         public string Code { get; set; } = String.Empty;
         [Id(1)]
-        // パスワード
+        // パスワードハッシュ
         public string PasswordHash { get; set; } = String.Empty;
 
     }

@@ -3,7 +3,7 @@
 namespace OrleansWebAPI7AppDemo.Models.Accounting
 {
     /// <summary>
-    /// 認証モデル
+    /// 認証モデル（パスワードあり）
     /// </summary>
     [GenerateSerializer]
     public class Authentication

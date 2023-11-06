@@ -12,15 +12,6 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
         {
         }
 
-        public override Task OnActivateAsync(CancellationToken cancellationToken)
-        {
-
-            string primaryKey = this.GetPrimaryKeyString(); //Grain IDを取得
-
-       
-
-            return base.OnActivateAsync(cancellationToken);
-        }
 
         public Task<Session?> Get()
         {

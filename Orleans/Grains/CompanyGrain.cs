@@ -12,6 +12,11 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
         {
         }
 
+        /// <summary>
+        /// グレイン有効化時の処理
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
 
