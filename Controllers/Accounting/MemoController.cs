@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Orleans;
 using OrleansWebAPI7AppDemo.Models.Accounting;
 using OrleansWebAPI7AppDemo.Orleans.Abstractions;
 using System.Threading.Tasks;
@@ -9,17 +10,25 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
     [Route("Accounting/[controller]")]
     public class MemoController : ControllerBase
     {
-        private static List<Memo> memos = new List<Memo>();
-        private static int nextId = 1;
+        private readonly IGrainFactory _grains;
+
+        public MemoController(IGrainFactory grains)
+        {
+            _grains = grains;
+        }
+
 
         /// <summary>
         /// ÉÅÉÇÇëSÇƒÇï\é¶ÇµÇ‹Ç∑
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult GetAllMemos()
+        public async Task<IActionResult> GetAllMemos()
         {
-            return Ok(memos);
+            var memoGrain = _grains.GetGrain<IMemoGrain>(0); // Assuming grain ID is 0
+            var memoState = await memoGrain.GetMemoState();
+
+            return Ok(memoState.Memos);
         }
 
         /// <summary>
@@ -27,9 +36,10 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         /// </summary>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public IActionResult GetMemo(int id)
+        public async Task<IActionResult> GetMemo(int id)
         {
-            var memo = memos.Find(m => m.Id == id);
+            var grain = _grains.GetGrain<IMemoGrain>(id);
+            var memo = await grain.GetMemo(id);
             if (memo == null)
             {
                 return NotFound();
@@ -37,44 +47,30 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             return Ok(memo);
         }
 
+
         /// <summary>
         /// ÉÅÉÇÇí«â¡ÇµÇ‹Ç∑
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public IActionResult AddMemo([FromBody] string content)
+        public async Task<IActionResult> AddMemo([FromBody] string content)
         {
-            var memo = new Memo
-            {
-                Id = nextId++,
-                Content = content,
-                Day = DateTime.Now
-            };
-            memos.Add(memo);
-            return Ok(memo);
+            var memoGrain = _grains.GetGrain<IMemoGrain>(0); // Assuming grain ID is 0
+            await memoGrain.AddMemo(content);
+
+            return Ok();
         }
+
 
         /// <summary>
         /// ÉÅÉÇÇçÌèúÇµÇ‹Ç∑
         /// </summary>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public IActionResult DeleteMemo(int id)
+        public async Task<IActionResult> DeleteMemo(int id)
         {
-            var memoToDelete = memos.Find(m => m.Id == id);
-            if (memoToDelete == null)
-            {
-                return NotFound();
-            }
-
-            memos.Remove(memoToDelete);
-
-            // çÌèúÇµÇΩå„ÇÃÉÅÉÇÇÃIDÇåJÇËè„Ç∞ÇÈ
-            foreach (var memo in memos.Where(m => m.Id > id))
-            {
-                memo.Id--;
-            }
-
+            var grain = _grains.GetGrain<IMemoGrain>(id);
+            await grain.DeleteMemo(id);
             return Ok();
         }
     }
