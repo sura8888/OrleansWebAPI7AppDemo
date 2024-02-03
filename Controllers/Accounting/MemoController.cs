@@ -10,68 +10,104 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
     [Route("Accounting/[controller]")]
     public class MemoController : ControllerBase
     {
-        private readonly IGrainFactory _grains;
+        private static Dictionary<int, List<Memo>> userMemos = new Dictionary<int, List<Memo>>();
+        private static int nextUserId = 1;
+        private static int nextMemoId = 1;
 
-        public MemoController(IGrainFactory grains)
+        private readonly IMemoGrain _memoGrain;
+
+        public MemoController(IMemoGrain memoGrain)
         {
-            _grains = grains;
+            _memoGrain = memoGrain;
         }
 
-
-        /// <summary>
-        /// メモを全てを表示します
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAllMemos()
+        [HttpPost()]
+        [Route("")]
+        public IActionResult AddUser()
         {
-            var memoGrain = _grains.GetGrain<IMemoGrain>(0); // Assuming grain ID is 0
-            var memoState = await memoGrain.GetMemoState();
-
-            return Ok(memoState.Memos);
+            var userId = nextUserId++;
+            userMemos[userId] = new List<Memo>();
+            return Ok(userId);
         }
 
-        /// <summary>
-        /// 指定したidのメモを表示します
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetMemo(int id)
+        [HttpGet()]
+        [Route("{userId}")]
+        public IActionResult GetAllMemos(int userId)
         {
-            var grain = _grains.GetGrain<IMemoGrain>(id);
-            var memo = await grain.GetMemo(id);
-            if (memo == null)
+            if (userMemos.ContainsKey(userId))
             {
-                return NotFound();
+                var userMemosList = userMemos[userId];
+                return Ok(userMemosList);
             }
+            else
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+        }
+
+        [HttpGet()]
+        [Route("{userId}/{memoId}")]
+        public IActionResult GetMemo(int userId, int memoId)
+        {
+            if (userMemos.ContainsKey(userId))
+            {
+                var userMemosList = userMemos[userId];
+                var memo = userMemosList.Find(m => m.MemoId == memoId);
+                if (memo == null)
+                {
+                    return NotFound($"Memo with ID {memoId} not found for user {userId}.");
+                }
+                return Ok(memo);
+            }
+            else
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+        }
+
+        [HttpPost()]
+        [Route("{userId}")]
+        public async Task<IActionResult> AddMemo(int userId, [FromBody] string content)
+        {
+            if (!userMemos.ContainsKey(userId))
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+
+            await _memoGrain.AddMemo(content);
+            var memo = await _memoGrain.GetMemo();
+            userMemos[userId].Add(memo);
             return Ok(memo);
         }
 
-
-        /// <summary>
-        /// メモを追加します
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> AddMemo([FromBody] string content)
+        [HttpDelete()]
+        [Route("{userId}/{memoId}")]
+        public async Task<IActionResult> DeleteMemo(int userId, int memoId)
         {
-            var memoGrain = _grains.GetGrain<IMemoGrain>(0); // Assuming grain ID is 0
-            await memoGrain.AddMemo(content);
+            if (userMemos.ContainsKey(userId))
+            {
+                var userMemosList = userMemos[userId];
+                var memoToDelete = userMemosList.Find(m => m.MemoId == memoId);
+                if (memoToDelete == null)
+                {
+                    return NotFound($"Memo with ID {memoId} not found for user {userId}.");
+                }
 
-            return Ok();
-        }
+                userMemosList.Remove(memoToDelete);
 
+                // 削除した後のメモのIDを繰り上げる
+                foreach (var memo in userMemosList.Where(m => m.MemoId > memoId))
+                {
+                    memo.MemoId--;
+                }
 
-        /// <summary>
-        /// メモを削除します
-        /// </summary>
-        /// <returns></returns>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMemo(int id)
-        {
-            var grain = _grains.GetGrain<IMemoGrain>(id);
-            await grain.DeleteMemo(id);
-            return Ok();
+                await _memoGrain.DeleteMemo(memoId);
+                return Ok();
+            }
+            else
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
         }
     }
 }

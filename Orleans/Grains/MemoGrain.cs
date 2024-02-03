@@ -1,71 +1,66 @@
-using System;
-using System.Threading.Tasks;
-using Orleans.Providers;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Orleans.Runtime;
 using OrleansWebAPI7AppDemo.Models.Accounting;
 using OrleansWebAPI7AppDemo.Orleans.Abstractions;
 
 namespace OrleansWebAPI7AppDemo.Orleans.Grains
 {
-    public class MemoGrain : Grain<MemoState>, IMemoGrain
+    public class MemoGrain : Grain, IMemoGrain
     {
-        new public MemoState State
-        {
-            get => base.State;
-            set => base.State = value;
-        }
+        private Memo? memo;
 
         public MemoGrain()
         {
-            State = new MemoState();
         }
 
-        public Task<MemoState> GetMemoState()
+        /// <summary>
+        /// グレイン有効化時の処理
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult(State);
-        }
-
-        public async Task<Memo> GetMemo(int id)
-        {
-            var memo = State.Memos.FirstOrDefault(m => m.Id == id);
-            return await Task.FromResult(memo);
-        }
-
-        public async Task AddMemo(string content)
-        {
-            var memo = new Memo
+            memo = new Memo
             {
-                Id = State.NextId++,
+                UserId = (int)this.GetPrimaryKeyLong(),
+                MemoId = 1,
+                Content = "初めてのメモ",
+                Day = DateTime.Now
+            };
+            return base.OnActivateAsync(cancellationToken);
+        }
+
+        public Task<Memo?> GetMemo()
+        {
+            return Task.FromResult(memo);
+        }
+
+        public Task AddMemo(string content)
+        {
+            var newMemo = new Memo
+            {
+                UserId = (int)this.GetPrimaryKeyLong(),
+                MemoId = memo.MemoId + 1,
                 Content = content,
                 Day = DateTime.Now
             };
-
-            State.Memos.Add(memo);
-
-            await WriteStateAsync();
-
-            return;
+            memo = newMemo;
+            return Task.CompletedTask;
         }
 
-        public async Task DeleteMemo(int id)
+        public Task DeleteMemo(int memoId)
         {
-            var memoToDelete = State.Memos.FirstOrDefault(m => m.Id == id);
-            if (memoToDelete != null)
+            // メモを削除する場合の処理を追加
+            // 例: メモを初期状態に戻す
+            memo = new Memo
             {
-                State.Memos.Remove(memoToDelete);
-
-                // 削除した後のメモのIDを繰り上げる
-                foreach (var memo in State.Memos.Where(m => m.Id > id))
-                {
-                    memo.Id--;
-                }
-
-                await WriteStateAsync(); // グレインの状態を永続化する
-            }
+                UserId = (int)this.GetPrimaryKeyLong(),
+                MemoId = 1,
+                Content = "初めてのメモ",
+                Day = DateTime.Now
+            };
+            return Task.CompletedTask;
         }
 
-        Task<int> IMemoGrain.AddMemo(string content)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
