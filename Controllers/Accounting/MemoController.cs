@@ -20,7 +20,10 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         {
             _memoGrain = memoGrain;
         }
-
+        /// <summary>
+        /// ユーザーをIDと紐づけて追加します
+        /// </summary>
+        /// <returns></returns>
         [HttpPost()]
         [Route("")]
         public IActionResult AddUser()
@@ -29,7 +32,10 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             userMemos[userId] = new List<Memo>();
             return Ok(userId);
         }
-
+        /// <summary>
+        /// 指定したユーザーIDのメモをすべて表示します
+        /// </summary>
+        /// <returns></returns>
         [HttpGet()]
         [Route("{userId}")]
         public IActionResult GetAllMemos(int userId)
@@ -45,6 +51,9 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             }
         }
 
+        /// <summary>
+        /// 指定したユーザーIDとメモ番号に対応したメモを表示します        /// </summary>
+        /// <returns></returns>
         [HttpGet()]
         [Route("{userId}/{memoId}")]
         public IActionResult GetMemo(int userId, int memoId)
@@ -65,6 +74,10 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             }
         }
 
+        /// <summary>
+        /// 指定したユーザーIDにメモを追加します
+        /// </summary>
+        /// <returns></returns>
         [HttpPost()]
         [Route("{userId}")]
         public async Task<IActionResult> AddMemo(int userId, [FromBody] string content)
@@ -80,6 +93,10 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             return Ok(memo);
         }
 
+        /// <summary>
+        /// 指定したユーザーIDとメモ番号に対応するメモを削除します
+        /// </summary>
+        /// <returns></returns>
         [HttpDelete()]
         [Route("{userId}/{memoId}")]
         public async Task<IActionResult> DeleteMemo(int userId, int memoId)
