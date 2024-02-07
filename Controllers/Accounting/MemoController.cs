@@ -10,21 +10,14 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
     [Route("Accounting/[controller]")]
     public class MemoController : ControllerBase
     {
-        private static Dictionary<int, List<Memo>> userMemos = new Dictionary<int, List<Memo>>();
         private static int nextUserId = 1;
         private static int nextMemoId = 1;
+        private static Dictionary<int, List<Memo>> userMemos = new Dictionary<int, List<Memo>>();
 
-        private readonly IMemoGrain _memoGrain;
-
-        public MemoController(IMemoGrain memoGrain)
-        {
-            _memoGrain = memoGrain;
-        }
         /// <summary>
         /// ユーザーをIDと紐づけて追加します
         /// </summary>
-        /// <returns></returns>
-        [HttpPost()]
+        [HttpPost]
         [Route("")]
         public IActionResult AddUser()
         {
@@ -32,18 +25,18 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
             userMemos[userId] = new List<Memo>();
             return Ok(userId);
         }
+
         /// <summary>
         /// 指定したユーザーIDのメモをすべて表示します
         /// </summary>
-        /// <returns></returns>
-        [HttpGet()]
+        [HttpGet]
         [Route("{userId}")]
         public IActionResult GetAllMemos(int userId)
         {
             if (userMemos.ContainsKey(userId))
             {
-                var userMemosList = userMemos[userId];
-                return Ok(userMemosList);
+                var memos = userMemos[userId];
+                return Ok(memos);
             }
             else
             {
@@ -52,21 +45,24 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         }
 
         /// <summary>
-        /// 指定したユーザーIDとメモ番号に対応したメモを表示します        /// </summary>
-        /// <returns></returns>
-        [HttpGet()]
+        /// 指定したユーザーIDとメモ番号に対応したメモを表示します
+        /// </summary>
+        [HttpGet]
         [Route("{userId}/{memoId}")]
         public IActionResult GetMemo(int userId, int memoId)
         {
             if (userMemos.ContainsKey(userId))
             {
-                var userMemosList = userMemos[userId];
-                var memo = userMemosList.Find(m => m.MemoId == memoId);
-                if (memo == null)
+                var memos = userMemos[userId];
+                var memo = memos.Find(m => m.MemoId == memoId);
+                if (memo != null)
+                {
+                    return Ok(memo);
+                }
+                else
                 {
                     return NotFound($"Memo with ID {memoId} not found for user {userId}.");
                 }
-                return Ok(memo);
             }
             else
             {
@@ -77,49 +73,46 @@ namespace OrleansWebAPI7AppDemo.Controllers.Accounting
         /// <summary>
         /// 指定したユーザーIDにメモを追加します
         /// </summary>
-        /// <returns></returns>
-        [HttpPost()]
+        [HttpPost]
         [Route("{userId}")]
-        public async Task<IActionResult> AddMemo(int userId, [FromBody] string content)
-        {
-            if (!userMemos.ContainsKey(userId))
-            {
-                return NotFound($"User with ID {userId} not found.");
-            }
-
-            await _memoGrain.AddMemo(content);
-            var memo = await _memoGrain.GetMemo();
-            userMemos[userId].Add(memo);
-            return Ok(memo);
-        }
-
-        /// <summary>
-        /// 指定したユーザーIDとメモ番号に対応するメモを削除します
-        /// </summary>
-        /// <returns></returns>
-        [HttpDelete()]
-        [Route("{userId}/{memoId}")]
-        public async Task<IActionResult> DeleteMemo(int userId, int memoId)
+        public IActionResult AddMemo(int userId, [FromBody] string content)
         {
             if (userMemos.ContainsKey(userId))
             {
-                var userMemosList = userMemos[userId];
-                var memoToDelete = userMemosList.Find(m => m.MemoId == memoId);
-                if (memoToDelete == null)
+                var memo = new Memo
+                {
+                    MemoId = nextMemoId++,
+                    Content = content,
+                    Day = DateTime.Now
+                };
+                userMemos[userId].Add(memo);
+                return Ok(userMemos[userId]);
+            }
+            else
+            {
+                return NotFound($"User with ID {userId} not found.");
+            }
+        }
+        /// <summary>
+        /// 指定したユーザーIDとメモ番号に対応するメモを削除します
+        /// </summary>
+        [HttpDelete]
+        [Route("{userId}/{memoId}")]
+        public IActionResult DeleteMemo(int userId, int memoId)
+        {
+            if (userMemos.ContainsKey(userId))
+            {
+                var memos = userMemos[userId];
+                var memoToRemove = memos.Find(m => m.MemoId == memoId);
+                if (memoToRemove != null)
+                {
+                    memos.Remove(memoToRemove);
+                    return Ok(userMemos[userId]);
+                }
+                else
                 {
                     return NotFound($"Memo with ID {memoId} not found for user {userId}.");
                 }
-
-                userMemosList.Remove(memoToDelete);
-
-                // 削除した後のメモのIDを繰り上げる
-                foreach (var memo in userMemosList.Where(m => m.MemoId > memoId))
-                {
-                    memo.MemoId--;
-                }
-
-                await _memoGrain.DeleteMemo(memoId);
-                return Ok();
             }
             else
             {

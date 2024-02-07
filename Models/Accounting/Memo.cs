@@ -1,8 +1,9 @@
-[GenerateSerializer]
-public class Memo
+namespace OrleansWebAPI7AppDemo.Models.Accounting
 {
-    public int UserId { get; set; }
-    public int MemoId { get; set; }
-    public string Content { get; set; }
-    public DateTime Day { get; set; }
+    public class Memo
+    {
+        public int MemoId { get; set; }
+        public string Content { get; set; }
+        public DateTime Day { get; set; }
+    }
 }
