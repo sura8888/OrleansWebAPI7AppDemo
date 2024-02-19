@@ -20,16 +20,17 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
         public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
 
-            string primaryKey = this.GetPrimaryKeyString(); //Grain IDを取得
+            string primaryKeys = this.GetPrimaryKeyString(); //Grain IDを取得
+            string[] primaryKey = primaryKeys.Split('-');
 
             // ↓　本来はデータベースから取得する
-            switch (primaryKey)
+            switch (primaryKey[0])
             {
                 case "A":
                     {
                         _testmemo = new TestMemo();
                         _testmemo.UserCode = "A";
-                        switch (primaryKey)
+                        switch (primaryKey[1])
                         {
                             case "1":
                                 {
@@ -59,7 +60,7 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
                     {
                         _testmemo = new TestMemo();
                         _testmemo.UserCode = "B";
-                        switch (primaryKey)
+                        switch (primaryKey[1])
                         {
                             case "1":
                                 {
