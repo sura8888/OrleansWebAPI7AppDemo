@@ -112,8 +112,5 @@ namespace OrleansWebAPI7AppDemo.Orleans.Grains
             _testmemo = null;
             return Task.CompletedTask;
         }
-
     }
-
-
 }
