@@ -2,7 +2,6 @@ using OrleansCodeGen.Orleans.Serialization.Codecs;
 
 namespace OrleansWebAPI7AppDemo.Models.Accounting
 {
-
     /// <summary>
     /// ƒƒ‚î•ñ
     /// </summary>
